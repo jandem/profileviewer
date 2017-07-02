@@ -1,0 +1,23 @@
+<head>
+  <script src="main.js"></script>
+  <title>Profile Viewer</title>
+  <link type="text/css" rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  JSON file: <input type="file" id="file">
+  Thread: <select id="thread"></select><br>
+  <input id="filter" placeholder="Filter...">
+  <button id="prevfilter" disabled>Back</button>
+  <input type="checkbox" id="onlyjs">Only JS<br>
+
+  <table id="frames">
+    <tr>
+      <th class="numheader">Total</th>
+      <th class="numheader">Total %</th>
+      <th class="numheader">Self</th>
+      <th>Name</th>
+      <th id="engine">interp/baseline/ion</th>
+  </table>
+
+</body>
