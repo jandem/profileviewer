@@ -103,6 +103,7 @@ function analyzeThread(thread) {
 
     nameToCount = new Map();
     onlyJS = document.getElementById("onlyjs").checked;
+    var showAll = document.getElementById("showall").checked;
     filter = document.getElementById("filter").value;
 
     var prevFilterButton = document.getElementById("prevfilter");
@@ -132,13 +133,25 @@ function analyzeThread(thread) {
             return a.count.selfCount - b.count.selfCount;
         return a.count.totalCount - b.count.totalCount;
     });
+    arr.reverse();
 
     var framesTable = document.getElementById("frames");
     framesTable.style.display = "";
 
-    for (var i = 0; i < arr.length; i++) {
+    framesTable.innerHTML = `
+      <tr>
+        <th class="numheader">Total</th>
+        <th class="numheader">Total %</th>
+        <th class="numheader">Self</th>
+        <th>Name</th>
+        <th id="engine">interp/baseline/ion</th>
+      </tr>`;
+
+    var numRows = showAll ? arr.length : Math.min(3000, arr.length);
+
+    for (var i = 0; i < numRows; i++) {
         var item = arr[i];
-        var row = framesTable.insertRow(1);
+        var row = framesTable.insertRow(i + 1);
         var cell;
 
         cell = row.insertCell(0);
@@ -172,13 +185,18 @@ function analyzeThread(thread) {
             cell.textContent = impl.interpreter + " / " + impl.baseline + " / " + impl.ion;
         }
     }
+
+    var s = "";
+    if (arr.length > numRows)
+        s = (arr.length - numRows) + " rows hidden. Select 'Show All' to show everything (might be slow).";
+    document.getElementById("rowshidden").textContent = s;
 }
 
 function clearFramesTable() {
     var framesTable = document.getElementById("frames");
     framesTable.style.display = "none";
-    for (var i = framesTable.rows.length - 1; i > 0; i--)
-        framesTable.deleteRow(i);
+    framesTable.innerHTML = "";
+    document.getElementById("rowshidden").textContent = "";
 }
 
 function analyze(data) {
@@ -204,15 +222,15 @@ function analyze(data) {
 
     saveFilter();
 
-    select.onchange = function() {
-        analyzeThread(data.threads[select.value]);
-    };
+    var analyzeThisThread = () => analyzeThread(data.threads[select.value]);
+
+    select.onchange = analyzeThisThread;
+    document.getElementById("onlyjs").onchange = analyzeThisThread;
+    document.getElementById("showall").onchange = analyzeThisThread;
+
     document.getElementById("filter").onchange = function() {
         saveFilter();
-        analyzeThread(data.threads[select.value]);
-    };
-    document.getElementById("onlyjs").onchange = function() {
-        analyzeThread(data.threads[select.value]);
+        analyzeThisThread();
     };
 }
 
